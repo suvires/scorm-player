@@ -1,0 +1,22 @@
+.progressBar {
+    background-color: $light-gray;    
+
+    > div {
+        background-color: $green;
+        text-align: right;
+        overflow: visible;
+        max-width: 100%;
+
+        > span {
+            padding: 0.1em 0.2em;
+            white-space:nowrap;
+            color: $dark-gray;
+        }
+        
+        &.filled {
+            span {
+                color: $white;
+            }
+        }
+    }
+}

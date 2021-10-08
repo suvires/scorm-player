@@ -1,0 +1,82 @@
+// -----------------------------------------------------------------------------
+// This file contains all application-wide Sass variables.
+// -----------------------------------------------------------------------------
+
+
+
+
+
+/// Regular font family
+/// @type List
+$text-font-stack: 'Roboto', 'Arial', sans-serif !default;
+
+/// Code (monospace) font family
+/// @type List
+$code-font-stack: 'Courier New', monospace !default;
+
+
+
+//Gray
+$gray-50: #FAFAFA !default;
+$gray-500: #9E9E9E !default;
+$gray-900: #212121 !default;
+
+//Green
+
+/// Light gray
+/// @type Color
+$light-gray: $gray-50;
+
+/// Medium gray
+/// @type Color
+$mid-gray: $gray-500;
+
+/// Dark gray
+/// @type Color
+$dark-gray: $gray-900;
+
+/// Green
+/// @type Color
+$green: #4CAF50 !default;
+
+/// White
+/// @type Color
+$white: #FFF !default;
+
+/// Copy text color
+/// @type Color
+$text-color: $dark-gray;
+
+/// Main brand color
+/// @type Color
+$brand-color: blue;
+
+
+
+/// Container's maximum width
+/// @type Length
+$max-width: 1180px !default;
+
+
+
+
+
+/// Breakpoints map
+/// @prop {String} keys - Keys are identifiers mapped to a given length
+/// @prop {Map} values - Values are actual breakpoints expressed in pixels
+$breakpoints: (
+  'small': 320px,
+  'medium': 768px,
+  'large': 1024px,
+) !default;
+
+
+
+
+
+
+/// Relative or absolute URL where all assets are served from
+/// @type String
+/// @example scss - When using a CDN
+///   $base-url: 'http://cdn.example.com/assets/';
+$base-url: '/assets/' !default;
