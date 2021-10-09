@@ -1,114 +1,129 @@
+import {SCORM} from 'pipwerks-scorm-api-wrapper';
+import { INITIAL_STATE } from '../config/initialState.js';
+import { FREE_NAVIGATION } from '../config/const.js';
+
+const scormInit = SCORM.init();
+
 export const UPDATE_CONTENT_PROGRESS = 'APP/CONTENT/UPDATE_PROGRESS';
-
-export const initialState = {	
-	contents: [									
-		{
-			title: "PDF 1 (local)",
-			type: "pdf",
-			src: "landing/contents/1.pdf",
-			progress: 0,
-		},
-		{
-			title: "Web (local)",
-			type: "web",
-			src: "landing/index.html",
-			progress: 0,
-		},
-		{
-			title: "Web (external)",
-			type: "web",
-			src: "https://suvi.es",
-			progress: 0,
-		},
-		{
-			title: "PDF 2 (local)",
-			type: "pdf",
-			src: "landing/contents/2.pdf",
-			progress: 0,
-		},
-		{
-			title: "PDF (external)",
-			type: "pdf",
-			src: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf",
-			progress: 0,
-		},			
-		{
-			title: "Video 1 (local)",
-			type: "video",
-			src: "landing/contents/1.mp4",
-			progress: 0,
-			maxTimeViewed: 3
-		},
-		{
-			title: "Video 2 (local)",
-			type: "video",
-			src: "landing/contents/2.mp4",
-			progress: 0,
-			maxTimeViewed: 15
-		},
-		{
-			title: "Storyline (local)",
-			type: "scorm",
-			src: "landing/contents/seguimiento/story.html",
-			progress: 0,
-		},
-		{
-			title: "YouTube 1",
-			type: "video",
-			src: "https://www.youtube.com/watch?v=C0DPdy98e4c",
-			progress: 0,
-		},
-		{
-			title: "YouTube 2",
-			type: "video",
-			src: "https://www.youtube.com/embed/bTqVqk7FSmY",
-			progress: 0,
-		},
-		{
-			title: "Vimeo 1",
-			type: "video",
-			src: "https://vimeo.com/33698814",
-			progress: 0,
-		},
-		{
-			title: "Vimeo 2",
-			type: "video",
-			src: "https://player.vimeo.com/video/76979871",
-			progress: 0,
-		},		
-	],
-	progress: 0,
-	lang: "en"
-};
-
-initialState.contents.forEach((content, index) => {
-	if (index === 0) {
-		initialState.contents[0].disabled = 0;
-	} else {
-		if (initialState.contents[index-1].progress === 100) {
-			initialState.contents[index].disabled = 0;
-		} else {
-			initialState.contents[index].disabled = 1;
-		}
-	}		
-});
+export const UPDATE_CONTENT_TIME_WATCHED = 'APP/CONTENT/MEDIA/UPDATE_TIME_WATCHED';
+export const UPDATE_CONTENT_CURRENT_TIME = 'APP/CONTENT/MEDIA/UPDATE_CURRENT_TIME';
 
 export const updateContentProgress = (payload) => ({
 	type: UPDATE_CONTENT_PROGRESS,
 	payload
 });
 
+export const updateContentTimeWatched = (payload) => ({
+	type: UPDATE_CONTENT_TIME_WATCHED,
+	payload
+});
+
+export const updateContentCurrentTime = (payload) => ({
+	type: UPDATE_CONTENT_CURRENT_TIME,
+	payload
+});
+
+function saveSuspendData(suspendData) {
+	//console.log("saveSuspendData");	
+	//console.log(suspendData);		
+	if(scormInit) {
+		SCORM.set("cmi.suspend_data", btoa(JSON.stringify(suspendData)));
+		SCORM.save();
+	}
+	//console.log(JSON.stringify(suspendData));		
+}
+
+function setScore(score) {
+	//console.log("setScore");	
+	//console.log(score);	
+	if(scormInit) {
+		SCORM.set("cmi.core.score.raw", score)   		
+		SCORM.save()		
+	}
+}
+
+function setCompleted() {
+	//console.log("setCompleted");		
+	if(scormInit) {
+		SCORM.set("cmi.core.lesson_status", "completed");
+		SCORM.quit();		
+	}
+}
+
+function loadSuspendData() {
+	//console.log("Loading suspend data...")
+    let suspendData;
+	if(scormInit) {
+		suspendData = SCORM.get('cmi.suspend_data');
+	}
+	if(suspendData) { 
+		return JSON.parse(atob(suspendData));
+	} else {		
+		let initialState = INITIAL_STATE;
+
+		if(FREE_NAVIGATION === 0) {
+			initialState.contents.forEach((content, index) => {
+				if (index === 0) {
+					initialState.contents[0].disabled = 0;
+				} else {
+					if (initialState.contents[index-1].progress === 100) {
+						initialState.contents[index].disabled = 0;
+					} else {
+						initialState.contents[index].disabled = 1;
+					}
+				}		
+			});
+		}
+		
+		if(!initialState.progress) {
+			initialState.progress = 0;
+		}
+
+		return initialState;
+	}
+}
+
+export const initialState = loadSuspendData();
+
+let prueba = JSON.stringify(initialState);
+console.log(prueba);
+console.log('Sin codificar: ' + prueba.length);
+prueba = btoa(prueba);
+console.log('Codificada: ' + prueba.length);
+
 export const storeReducer = (state = initialState, action) => {	
+	let id = action.payload.id;
+	let newState;
 	switch (action.type) {
-		case UPDATE_CONTENT_PROGRESS:				
-			const id = action.payload.id;
-			const progress = action.payload.progress;			
+		case UPDATE_CONTENT_PROGRESS:							
+			let progress = Math.ceil(action.payload.progress);
+			if (progress > 100) progress = 100;			
 			state.contents[id].progress = progress;
-			if(id + 1 <  state.contents.length - 1) {
+			if(progress === 100 && id + 1 <  state.contents.length - 1) {
 				state.contents[id + 1].disabled = 0;
 			}
-			state.progress += Math.round(100 / state.contents.length);
-			return ({...initialState, ...state});
+			if(progress === 100 && !state.contents[id].completed) {
+				state.contents[id].completed = 1;
+				state.progress += Math.ceil(100 / state.contents.length);				
+				if (state.progress >= 100) {
+					state.progress = 100;	
+					setCompleted();
+				}
+				setScore(state.progress);
+			} 		
+			newState = ({...initialState, ...state});
+			saveSuspendData(newState);
+			return newState;
+		case UPDATE_CONTENT_TIME_WATCHED:							
+			state.contents[id].timeWatched = action.payload.timeWatched;			
+			newState = ({...initialState, ...state});
+			saveSuspendData(newState);
+			return newState;
+		case UPDATE_CONTENT_CURRENT_TIME:							
+			state.contents[id].currentTime = action.payload.currentTime;			
+			newState = ({...initialState, ...state});
+			saveSuspendData(newState);
+			return newState;
 		default:
 			throw new Error();
 	}

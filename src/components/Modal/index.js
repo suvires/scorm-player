@@ -26,7 +26,7 @@ function Modal(props) {
 	} else {
 		return ReactDOM.createPortal(
 			<div className="modal">
-				<div>
+				<div className="modalWrapper">
 					<div className="modalHeader">
 						<h1>{props.title}</h1>
 						<Close onClose={props.onClose} />

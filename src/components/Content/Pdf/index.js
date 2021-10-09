@@ -21,10 +21,7 @@ function Pdf(props) {
 
     return (		
         <Worker workerUrl={workerUrl}>							
-			<div
-				style={{
-					height: '100%',
-				}}
+			<div className="pdfViewer"
 			>
 				<Viewer 
 					fileUrl={content.src} 

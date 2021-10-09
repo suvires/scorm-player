@@ -4,7 +4,7 @@ import Modal from '../Modal';
 import Progressbar from '../Progressbar';
 import Button from '../Button';
 import Pdf from './Pdf';
-import Video from './Video';
+import Media from './Media';
 import Scorm from './Scorm';
 import Web from './Web';
 
@@ -19,56 +19,31 @@ function Content(props) {
 
 	const toogleModal = () => {
 		setModal(!modal);
-		modal ? document.querySelector('body').style.overflow = 'visible' : document.querySelector('body').style.overflow = 'hidden';
+		if (modal) {
+			document.querySelector('body').style.overflow = 'visible'; 				
+			if (window.YT) { 
+				const player = window.YT.get('player');			
+				if (!!player) { //if player is not null
+					player.destroy();
+				}
+			}
+		} else {
+			document.querySelector('body').style.overflow = 'hidden';
+		}
 	}
 
 	const handleClick = (e) => {
 		e.preventDefault();
 		toogleModal();
 	}
-
-	// let tempProgress = props.progress ? props.progress : 0;
-	// let tempMaxTimeViewed = props.maxTimeViewed ? props.maxTimeViewed : 0;
-	// let tempLastTime = props.lastTime ? props.lastTime : 0;
-	// const [maxTimeViewed, setMaxTimeViewed] = useState(tempMaxTimeViewed);
-	// const [lastTime, setLastTime] = useState(tempLastTime);
-
-	// const updateMaxTimeViewed = (maxTimeViewed) => {
-	// 	setMaxTimeViewed(maxTimeViewed);
-	// }
-
-	// const updateLastTime = (lastTime) => {
-	// 	setLastTime(lastTime);
-	// }
-
-	// useLayoutEffect(
-	// 	() => {		
-	// 		updateProgress(progress);			
-	// 	},
-	// 	[progress]
-	// );	
-
-	// useEffect(
-	// 	() => {								
-	// 		updateMaxTimeViewed(maxTimeViewed);			
-	// 	},
-	// 	[maxTimeViewed]
-	// );	
-
-	// useEffect(
-	// 	() => {		
-	// 		updateLastTime(lastTime);			
-	// 	},
-	// 	[lastTime]
-	// );	
 	
 	let children;
 	switch(content.type) {
 		case 'pdf':
 			children = <Pdf id={id} />;
 			break
-		case 'video':
-			children = <Video id={id} />;
+		case 'media':
+			children = <Media id={id} />;
 			break;			
 		case 'scorm':
 			children = <Scorm id={id} />;

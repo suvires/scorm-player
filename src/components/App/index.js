@@ -1,5 +1,5 @@
 import { useStore } from '../../store/Store';
-import ContentList from '../Content/ContentList';
+import Content from '../Content';
 import Progressbar from '../Progressbar';
 
 function App() {
@@ -12,7 +12,11 @@ function App() {
 			<p>Course progress</p>
 			<Progressbar progress={progress}/>
 			<h2>Course contents</h2>	
-			<ContentList />								
+			<div>				
+				{state.contents.map((content, index) => (
+					<Content key={index} id={index} />
+				))}	
+			</div>						
 		</>
 	);
 }
